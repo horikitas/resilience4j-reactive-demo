@@ -34,6 +34,6 @@ public class CBconfig {
         log.info("Request received for unstable endpoint");
         log.info("Circuit Breaker getFailureRateThreshold: {}", cb.getCircuitBreakerConfig().getFailureRateThreshold());
         log.info("Circuit Breaker getMinimumNumberOfCalls: {}", cb.getCircuitBreakerConfig().getMinimumNumberOfCalls());
-        log.info("Circuit Breakder Name: {}", cb.getName());
+        log.info("Circuit Breaker Name: {}", cb.getName());
     }
 }
