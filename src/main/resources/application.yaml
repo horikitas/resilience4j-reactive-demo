@@ -1,38 +1,21 @@
 spring:
   application:
 
+#TODO - This is not loading in tests
 resilience4j.circuitbreaker:
-  circuitBreakerAspectOrder: 2
   configs:
     default:
-      slidingWindowSize: 100
+      minimumNumberOfCalls: 10
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 2
+      waitDurationInOpenState: 100ms
+      failureRateThreshold: 30
+      eventConsumerBufferSize: 2
       registerHealthIndicator: true
-  instances:
-    unstableService:
-      baseConfig: default
-      slidingWindowType: COUNT_BASED
-      writable-stack-trace-enabled: true
-      automatic-transition-from-open-to-half-open-enabled: true
-      permittedNumberOfCallsInHalfOpenState: 10
-      waitDurationInOpenState: 5s
-      failureRateThreshold: 100
-      minimumNumberOfCalls: 20
-resilience4j.retry:
-  retryAspectOrder: 1
-  configs:
-    default:
-      maxAttempts: 3
-      waitDuration: 10ms
-      enableExponentialBackoff: false
-      retryExceptions:
-        - java.util.concurrent.TimeoutException
-        - java.io.IOException
-        - java.lang.RuntimeException
-  instances:
-    unstableService:
-      baseConfig: default
-
-
+    instances:
+      unstableService:
+        name: unstableService
+        baseConfig: default
 management:
   endpoints:
     web:

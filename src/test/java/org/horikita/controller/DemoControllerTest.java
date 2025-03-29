@@ -1,9 +1,12 @@
 package org.horikita.controller;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -14,7 +17,9 @@ import static org.horikita.controller.DemoController.FAILURE_SIMULATOR_COUNT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-@WebFluxTest(DemoController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DemoControllerTest {
 
     private static final String UNSTABLE_ENDPOINT = "/api/unstable";
@@ -22,101 +27,98 @@ public class DemoControllerTest {
     @Autowired
     private WebTestClient webTestClient;
 
+    @Autowired
+    private CircuitBreaker cb;
+
     @Test
     public void contextLoads() {
         assertNotNull(webTestClient);
     }
 
+    @Order(1)
     @Test
-    void singleFirstTest() {
-        StepVerifier.create(this.expectSuccess(1))
+    void testWithOneFailure() throws InterruptedException {
+        //1, 2, 3
+        Flux<ResultPair> threeSuccess = Flux.range(1, 3).concatMap(counter -> this.hitApi(counter, false));
+        StepVerifier.create(threeSuccess)
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
                 .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
                 .verifyComplete();
-    }
+        assertEquals("CLOSED", cb.getState().toString());
+        assertEquals(0, cb.getMetrics().getNumberOfFailedCalls());
 
+        //4, 5, 6, 7, 8, 9 ==> count 6
+        Flux<ResultPair> failSeries = Flux.range(4, 6).concatMap(counter -> this.hitApi(counter, true));
 
-    @Test
-    void testUnstableWithoutSimulatingFail() {
-        Flux.range(1,2)
-                .concatMap(this::expectSuccess)
-                .collectList() // Mono<List<String>>
-                .doOnNext(responses -> {
-                    long fallbackCount = responses.stream()
-                            .filter(resultPair -> resultPair.message.startsWith("Fallback"))
-                            .count();
-                    log.info("Fallback triggered for {} of 10 requests", fallbackCount);
-                    assertEquals(0, fallbackCount);
+        StepVerifier.create(failSeries)
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .verifyComplete();
+        assertEquals("CLOSED", cb.getState().toString());
+        assertEquals(6, cb.getMetrics().getNumberOfFailedCalls());
+
+        //The call that will OPEN circuit breaker
+        Flux<ResultPair> finalCall = Flux.range(11, 1).concatMap(counter -> this.hitApi(counter, true));
+
+        StepVerifier.create(finalCall)
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Retry Fallback:"))
+                .verifyComplete();
+        assertEquals("OPEN", cb.getState().toString());
+        assertEquals(7, cb.getMetrics().getNumberOfFailedCalls());
+
+        //callInOpenState
+        Flux<ResultPair> callInOpenState = Flux.range(12, 1).concatMap(counter -> this.hitApi(counter, true));
+
+        StepVerifier.create(callInOpenState)
+                .expectNextMatches(resultPair -> resultPair.message.contains("Fallback: CircuitBreaker 'unstableEndpoint' is OPEN"))
+                .verifyComplete();
+        assertEquals("OPEN", cb.getState().toString());
+        assertEquals(7, cb.getMetrics().getNumberOfFailedCalls());
+
+        Thread.sleep(600);
+        //9 calls
+        StepVerifier.create(threeSuccess.mergeWith(threeSuccess).mergeWith(threeSuccess))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .verifyComplete();
+
+        assertEquals("HALF_OPEN", cb.getState().toString());
+        assertEquals(0, cb.getMetrics().getNumberOfFailedCalls());
+
+        StepVerifier.create(threeSuccess)
+                .assertNext(resultPair -> {
+                    assertTrue(resultPair.message.startsWith("Success"));
+                    assertEquals("CLOSED", cb.getState().toString());
                 })
-                .block();
-    }
-
-    @Test
-    void testUnstableEndpointWithFallbackTriggered() {
-        Flux<ResultPair> pairFlux = Flux.range(1, 2)
-                .concatMap(counter -> isExpectedToFail(counter.intValue())? expectFail(counter.intValue()) : expectSuccess(counter.intValue()));
-
-        StepVerifier.create(pairFlux)
-                .assertNext(this::logAndAssert)
-                .assertNext(this::logAndAssert)
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
+                .expectNextMatches(resultPair -> resultPair.message.startsWith("Success"))
                 .verifyComplete();
-    }
 
-    @Test
-    void testWithInterval() {
-        Flux<ResultPair> delayedFlux = Flux.range(1, 3)
-                .concatMap(counter -> isExpectedToFail(counter)? expectFail(counter) : expectSuccess(counter));
-
-        StepVerifier.withVirtualTime(() -> delayedFlux)
-                .thenAwait(Duration.ofMillis(300))
-                .expectNextCount(3)
-                .thenAwait(Duration.ofMillis(300))
-                .verifyComplete();
-    }
-
-    private void logAndAssert(ResultPair t) {
-        responseLogger(t.counter, t.message);
-        if (isExpectedToFail(t.counter)) {
-            assertFallback(t.message);
-        } else {
-            assertSuccess(t.message);
-        }
-    }
-
-    private boolean isExpectedToFail(int counter) {
-        return counter % FAILURE_SIMULATOR_COUNT == 0;
     }
 
 
-    private Flux<ResultPair> expectSuccess(int i) {
+    private Flux<ResultPair> hitApi(int i, boolean simulateFail) {
+        log.info("Hitting api {} time with simulateFail {}", i, simulateFail);
         return webTestClient.get()
-                .uri(UNSTABLE_ENDPOINT)
+                .uri(UNSTABLE_ENDPOINT+"?simulateFail="+simulateFail)
                 .exchange()
-                .expectStatus().isOk()
                 .returnResult(String.class)
                 .getResponseBody()
                 .doOnNext(body -> responseLogger(i, body))
                 .map(body -> new ResultPair(i, body));
     }
-
-    private Flux<ResultPair> expectFail(int i) {
-        return webTestClient.get()
-                .uri(UNSTABLE_ENDPOINT)
-                .exchange()
-                .expectStatus().is5xxServerError()
-                .returnResult(String.class)
-                .getResponseBody()
-                .doOnNext(body -> responseLogger(i, body))
-                .map(body -> new ResultPair(i, body));
-    }
-
-    private void assertSuccess(String body) {
-        assertTrue(body.startsWith("Success"));
-    }
-
-    private void assertFallback(String body) {
-        assertTrue(body.startsWith("Simulating failure for attempt"));
-    }
-
 
     private static void responseLogger(long i, String body) {
         log.info("Response {} is : {}", i, body);
@@ -124,25 +126,5 @@ public class DemoControllerTest {
 
     private record ResultPair(int counter, String message) {}
 
-
-   /* @Test
-    void testWithDelayBetweenCallsWithRetries() {
-        Flux.interval(Duration.ofMillis(500))
-                .take(10)
-                .concatMap(i ->
-                        webTestClient.get()
-                                .uri("/api/unstable")
-                                .exchange()
-                                .onErrorResume(ex -> {
-                                    log.info("Request " + i + " failed: " + ex.getMessage());
-                                    return Mono.empty();
-                                })
-                                .expectStatus().isOk()
-                                .returnResult(String.class)
-                                .getResponseBody()
-                                .doOnNext(body -> log.info("Response " + i + ": " + body))
-                )
-                .blockLast();  // wait for all requests to finish
-    }*/
 
 }
