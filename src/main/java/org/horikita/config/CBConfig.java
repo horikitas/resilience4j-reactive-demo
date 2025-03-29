@@ -1,4 +1,4 @@
-package org.horikita.controller;
+package org.horikita.config;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -11,10 +11,11 @@ import java.time.Duration;
 
 @Slf4j
 @Configuration
-public class CBconfig {
+public class CBConfig {
 
-    @Bean
+    @Bean("orderVendorAPICB")
     public CircuitBreaker circuitBreaker() {
+        //TODO - To investigate later why it's not loading properties from spring configuration
         CircuitBreakerConfig config = CircuitBreakerConfig.custom()
                 .failureRateThreshold(30) // percentage
                 .minimumNumberOfCalls(10)
@@ -23,9 +24,7 @@ public class CBconfig {
                 .slidingWindowSize(10)
                 .build();
         CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(config);
-        CircuitBreaker cb = circuitBreakerRegistry.circuitBreaker("unstableEndpoint");
-
-
+        CircuitBreaker cb = circuitBreakerRegistry.circuitBreaker("orderVendorAPICB");
         logCircuitBreaker(cb);
         return cb;
     }
