@@ -2,6 +2,8 @@ package org.horikita.service;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import io.github.resilience4j.reactor.retry.RetryOperator;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.horikita.dto.OrderRequestDTO;
@@ -10,7 +12,6 @@ import org.horikita.dto.OrderStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 /***
@@ -22,14 +23,15 @@ import reactor.core.publisher.Mono;
 public class OrderService {
 
     //Since Qualifier doesn't work well with Lombok, using explicit constructor binding
-    private final @NonNull CircuitBreaker cb;
+    private final @NonNull CircuitBreaker circuitBreaker;
 
     public OrderService(final @NonNull @Qualifier("orderVendorAPICB") @Autowired CircuitBreaker cb) {
-        this.cb = cb;
+        this.circuitBreaker = cb;
     }
 
     public Mono<OrderResponseDTO> placeOrder(final OrderRequestDTO request, boolean simulateFail) {
         return callExternalAPI(request, simulateFail)
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorResume(e -> {
                     log.error("Error occurred while processing order : {}", e.getMessage());
                     return fallbackOnErrors(e, request);
@@ -63,10 +65,10 @@ public class OrderService {
         final OrderResponseDTO pendingOrderResponse =
                 OrderResponseDTO.builder().orderId(request.getOrderId()).status(OrderStatusEnum.PENDING).build();
         if (error instanceof CallNotPermittedException) {
-            log.error("Circuit Breaker is open: {}, cbState {}", error.getMessage(), cb.getState());
+            log.error("Circuit Breaker is open: {}, cbState {}", error.getMessage(), circuitBreaker.getState());
             return Mono.just(pendingOrderResponse);
         }
-        log.warn("Retry Fallback triggered: {}, cbState {}", error.getMessage(), cb.getState());
+        log.warn("Retry Fallback triggered: {}, cbState {}", error.getMessage(), circuitBreaker.getState());
         return Mono.just(pendingOrderResponse);
     }
 
