@@ -5,7 +5,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":8,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":3,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [2] ✅ Simulating SUCCESS: orderId=2, productId=2
@@ -14,7 +14,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":9,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":4,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [3] ✅ Simulating SUCCESS: orderId=3, productId=3
@@ -23,7 +23,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"0.0%","slowCallRate":"0.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":10,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":5,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [4] ✅ Simulating SUCCESS: orderId=4, productId=4
@@ -32,7 +32,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"0.0%","slowCallRate":"0.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":10,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":6,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [5] ✅ Simulating SUCCESS: orderId=5, productId=5
@@ -41,7 +41,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"0.0%","slowCallRate":"0.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":10,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":7,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [6] ✅ Simulating SUCCESS: orderId=6, productId=6
@@ -50,7 +50,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"0.0%","slowCallRate":"0.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":10,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":8,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [7] ✅ Simulating SUCCESS: orderId=7, productId=7
@@ -59,7 +59,7 @@ Status: 200
 
 ---
 📡 Circuit Breaker State:
-{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"0.0%","slowCallRate":"0.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":10,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"orderVendorAPICB":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"30.0%","slowCallRateThreshold":"100.0%","bufferedCalls":9,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ========== SLEEPING (2 s) ==========
 
 [8] ✅ Simulating SUCCESS: orderId=8, productId=8

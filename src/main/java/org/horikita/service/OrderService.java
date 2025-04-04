@@ -3,7 +3,6 @@ package org.horikita.service;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.horikita.dto.OrderRequestDTO;

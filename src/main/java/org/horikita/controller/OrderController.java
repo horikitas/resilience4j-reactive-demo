@@ -30,11 +30,7 @@ class OrderController {
 
         return orderRequestMono.flatMap(orderRequestDTO -> orderService.placeOrder(orderRequestDTO, simulateFail))
                 .doOnSuccess(result -> log.info("Result: {}", result))
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> {
-                    log.error("Unexpected error occurred: {}", e.getMessage()); //Any unexpected errors are caught here, this isn't the place for circuit breaker
-                    return Mono.just(ResponseEntity.internalServerError().body(FALLBACK_RESPONSE));
-                });
+                .map(ResponseEntity::ok);
     }
 
     private static final OrderResponseDTO FALLBACK_RESPONSE =
