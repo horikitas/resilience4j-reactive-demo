@@ -1,7 +1,7 @@
 spring:
   application:
+    name: resilience4j-reactive-demo
 
-#TODO - This is not loading in tests
 resilience4j.circuitbreaker:
   configs:
     default:
@@ -13,9 +13,10 @@ resilience4j.circuitbreaker:
       eventConsumerBufferSize: 2
       registerHealthIndicator: true
     instances:
-      unstableService:
-        name: unstableService
+      orderVendorAPICB:
+        name: orderVendorAPICB
         baseConfig: default
+
 management:
   endpoints:
     web:
