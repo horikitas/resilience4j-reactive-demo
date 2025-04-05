@@ -30,10 +30,8 @@ for ((i=1; i<=TOTAL_CALLS; i++)); do
       "productId": '"$PRODUCT_ID"'
     }'
 
-  echo -e "\n---"
-
   # Print circuit breaker state (raw JSON)
-  echo "📡 Circuit Breaker State:"
+  echo "Circuit Breaker State:"
   curl -s "$CB_STATE_URL"
   echo -e "\n========== SLEEPING ($SLEEP_SECONDS s) ==========\n"
 

@@ -342,12 +342,16 @@ Status: 200
 
 Simulation complete.
 ```
-**NEXT Steps**
+
+**NEXT Steps:**
 🔍 Test Cases
+
 📊 Exposing Resilience4j metrics via Actuator
+
 📈 Explore more configuration options 
+
 🧪 Add another API with different circuit breaker settings
+
 💣 API curl on loop and watch the circuit breaker state through health API
 
-
-
+Thank you!!
