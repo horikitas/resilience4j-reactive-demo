@@ -343,7 +343,7 @@ Status: 200
 Simulation complete.
 ```
 
-**NEXT Steps**
+**NEXT Steps:**
 🔍 Test Cases
 
 📊 Exposing Resilience4j metrics via Actuator
