@@ -2,20 +2,36 @@ spring:
   application:
     name: resilience4j-reactive-demo
 
-resilience4j.circuitbreaker:
-  configs:
-    default:
-      minimumNumberOfCalls: 10
-      slidingWindowSize: 10
-      permittedNumberOfCallsInHalfOpenState: 2
-      waitDurationInOpenState: 100ms
-      failureRateThreshold: 30
-      eventConsumerBufferSize: 2
-      registerHealthIndicator: true
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        minimumNumberOfCalls: 10
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 2
+        waitDurationInOpenState: 100ms
+        failureRateThreshold: 30
+        eventConsumerBufferSize: 2
+        registerHealthIndicator: true
+      instances:
+        orderVendorAPICB:
+          name: orderVendorAPICB
+          baseConfig: default
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 200ms
+        retry-exceptions:
+          - org.horikita.exceptions.RetriableException
+          - java.lang.RuntimeException #This is a broad umbrella, need to use mindfully
+        ignore-exceptions:
+          - org.horikita.exceptions.NonRetriableException
     instances:
-      orderVendorAPICB:
-        name: orderVendorAPICB
+      orderVendorAPIRetry:
+        name: orderVendorAPIRetry
         baseConfig: default
+        max-attempts: 2
 
 management:
   endpoints:

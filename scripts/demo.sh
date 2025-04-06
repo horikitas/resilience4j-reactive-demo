@@ -3,7 +3,7 @@
 URL="http://localhost:8080/api/place-order"
 CB_STATE_URL="http://localhost:8080/actuator/circuitbreakers"
 TOTAL_CALLS=30
-SLEEP_SECONDS=2   # Increased sleep between requests
+SLEEP_SECONDS=1   # Increased sleep between requests
 
 echo "Starting Resilience4j simulation with longer OPEN state and 40% failure rate..."
 
