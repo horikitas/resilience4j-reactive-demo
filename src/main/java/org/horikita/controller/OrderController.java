@@ -26,15 +26,15 @@ class OrderController {
     @PostMapping("/place-order")
     public Mono<ResponseEntity<OrderResponseDTO>> unstableEndpoint(
             @RequestParam(value = "simulateFail", defaultValue = "false") boolean simulateFail,
+            @RequestParam(value = "isRetriable", defaultValue = "true") boolean isRetriable,
             @RequestBody Mono<OrderRequestDTO> orderRequestMono) {
 
-        return orderRequestMono.flatMap(orderRequestDTO -> orderService.placeOrder(orderRequestDTO, simulateFail))
+        return orderRequestMono.flatMap(orderRequestDTO -> orderService.placeOrder(orderRequestDTO, simulateFail, isRetriable))
                 .doOnSuccess(result -> log.info("Result: {}", result))
                 .map(ResponseEntity::ok);
     }
 
-    private static final OrderResponseDTO FALLBACK_RESPONSE =
-            OrderResponseDTO.builder().orderId(-1).status(OrderStatusEnum.ERROR).build();
+
 
 }
 
